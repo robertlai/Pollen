@@ -1,0 +1,15 @@
+{
+  "name": "Pollen",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Robert Lai <rcylai@hotmail.com>",
+  "license": "MIT",
+  "packageManager": "yarn@3.0.2",
+  "dependencies": {
+    "axios": "^0.23.0",
+    "discord.js": "^13.2.0"
+  }
+}

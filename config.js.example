@@ -1,0 +1,4 @@
+const CHANNEL_ID = '1234';
+const TOKEN = 'fake-token';
+
+module.exports = { CHANNEL_ID, TOKEN };
