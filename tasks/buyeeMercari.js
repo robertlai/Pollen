@@ -19,10 +19,10 @@ const run = query => {
 
     let messages = [];
     if (numResults != numResultsCache[query]) {
-      messages.push(`${query} on Mercari: ${numResults} results (previously ${numResultsCache[query] || 0})\n${url}`);
+      messages.push(`${query} on Buyee Mercari: ${numResults} results (previously ${numResultsCache[query] || 0})\n${url}`);
     }
     if (initializedCache[query] && newItemIds.length) {
-      messages.push(`${query} on Mercari new items:\n${newItemIds.map(itemId => `https://buyee.jp/mercari/item/${itemId}`).join('\n')}`);
+      messages.push(`${query} on Buyee Mercari new items:\n${newItemIds.map(itemId => `https://buyee.jp/mercari/item/${itemId}`).join('\n')}`);
       newItemIds.slice(0, 3).forEach(itemId => messages.push(`https://static.mercdn.net/c!/w=240/thumb/photos/${itemId}_1.jpg`));
     }
 
@@ -32,7 +32,7 @@ const run = query => {
 
     return messages;
   }).catch(err => {
-    return [`Mercari (${query}) failed: ${error.response?.status}`];
+    return [`Buyee Mercari (${query}) failed: ${err.response?.status}`];
   });
 };
 

@@ -23,10 +23,10 @@ const run = query => {
 
     let messages = [];
     if (numResults != numResultsCache[query]) {
-      messages.push(`${query} on Yahoo Auction: ${numResults} results (previously ${numResultsCache[query] || 0})\n${url}`);
+      messages.push(`${query} on Buyee Yahoo Auction: ${numResults} results (previously ${numResultsCache[query] || 0})\n${url}`);
     }
     if (initializedCache[query] && newItemIds.length) {
-      messages.push(`${query} on Yahoo Auction new items:\n${newItemIds.map(itemId => `https://buyee.jp/item/yahoo/auction/${itemId}`).join('\n')}`);
+      messages.push(`${query} on Buyee Yahoo Auction new items:\n${newItemIds.map(itemId => `https://buyee.jp/item/yahoo/auction/${itemId}`).join('\n')}`);
       newItemIds.slice(0, 3).forEach(itemId => messages.push(itemIdToImgSrc[itemId]));
     }
 
@@ -42,7 +42,7 @@ const run = query => {
       itemCache[query] = {};
       return [];
     } else {
-      return [`Yahoo Auction (${query}) failed: ${error.response?.status}`];
+      return [`Buyee Yahoo Auction (${query}) failed: ${err.response?.status}`];
     }
   });
 };

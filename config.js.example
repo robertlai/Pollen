@@ -1,4 +1,15 @@
 const CHANNEL_ID = '1234';
 const TOKEN = 'fake-token';
 
-module.exports = { CHANNEL_ID, TOKEN };
+const MINUTE = 60 * 1000;
+const TASK_CONFIGS = [{
+  taskType: 'buyeeMercari',
+  query: 'Pollen',
+  interval: 5 * MINUTE,
+}, {
+  taskType: 'buyeeYahooAuction',
+  query: 'Pollen',
+  interval: 10 * MINUTE,
+}];
+
+module.exports = { CHANNEL_ID, TOKEN, TASK_CONFIGS };

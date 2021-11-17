@@ -1,38 +1,17 @@
-const { CHANNEL_ID, TOKEN } = require('./config.js');
+const { CHANNEL_ID, TOKEN, TASK_CONFIGS } = require('./config.js');
 
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
-const mercariTask = require('./tasks/mercari');
-const yahooAuctionTask = require('./tasks/yahooAuction');
-
-const MINUTE = 60 * 1000;
-
-const taskConfigs = [{
-  task: mercariTask,
-  query: '<REDACTED>',
-  interval: 5 * MINUTE,
-}, {
-  task: mercariTask,
-  query: '<REDACTED_2>',
-  interval: 5 * MINUTE,
-},{
-  task: yahooAuctionTask,
-  query: '<REDACTED>',
-  interval: 10 * MINUTE,
-}, {
-  task: yahooAuctionTask,
-  query: '<REDACTED_2>',
-  interval: 10 * MINUTE,
-}];
+const tasks = require('./tasks');
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   const notificationsChannel = client.channels.resolve(CHANNEL_ID);
 
-  taskConfigs.forEach(({ task, query, interval }) => {
-    const runTask = () => task(query).then(messages => messages.forEach(message => notificationsChannel.send(message)));
+  TASK_CONFIGS.forEach(({ taskType, query, interval }) => {
+    const runTask = () => tasks[taskType](query).then(messages => messages.forEach(message => notificationsChannel.send(message)));
     runTask();
     setInterval(runTask, interval);
   });
