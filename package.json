@@ -7,9 +7,10 @@
   },
   "author": "Robert Lai <rcylai@hotmail.com>",
   "license": "MIT",
-  "packageManager": "yarn@3.0.2",
+  "packageManager": "yarn@3.2.0",
   "dependencies": {
     "axios": "^0.23.0",
-    "discord.js": "^13.2.0"
+    "discord.js": "^13.2.0",
+    "puppeteer": "^13.5.1"
   }
 }

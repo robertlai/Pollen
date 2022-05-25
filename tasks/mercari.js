@@ -1,14 +1,20 @@
 const axios = require('axios');
+const puppeteer = require('puppeteer');
 
 let initializedCache = {};
 let itemCache = {};
 
-const run = query => {
-  const itemIdRegex = /href="\/item\/(\w+)">/g;
-  const url = `https://jp.mercari.com/search?keyword=${encodeURIComponent(query)}&status=on_sale&sort=created_time&order=desc`;
+const run = async query => {
+  try {
+    const itemIdRegex = /href="\/item\/(\w+)">/g;
+    const url = `https://jp.mercari.com/search?keyword=${encodeURIComponent(query)}&status=on_sale&sort=created_time&order=desc`;
 
-  return axios.get(url).then(res => {
-    const itemIdMatches = [...res.data.matchAll(itemIdRegex)];
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle2' });
+    const pageHtml = await page.evaluate('new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML');
+
+    const itemIdMatches = [...pageHtml.matchAll(itemIdRegex)];
     const itemIds = itemIdMatches.map(itemIdMatch => itemIdMatch[1]);
     const newItemIds = itemIds.filter(itemId => !itemCache[query]?.[itemId]);
 
@@ -22,9 +28,9 @@ const run = query => {
     itemCache[query] = itemIds.reduce((acc, cur) => ({...acc, [cur]: true}), {});
 
     return messages;
-  }).catch(err => {
-    return [`Mercari (${query}) failed: ${err.response?.status}`];
-  });
+  } catch (err) {
+    return [`Mercari (${query}) failed: ${err}`];
+  }
 };
 
 module.exports = run;
