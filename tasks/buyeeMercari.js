@@ -1,20 +1,17 @@
 const axios = require('axios');
+const { extractAll, extractOne } = require('../utils');
 
 let initializedCache = {};
 let numResultsCache = {};
 let itemCache = {};
 
-const run = query => {
-  const numResultsRegex = new RegExp(`&quot;${query}&quot;\\s*(\\d+)\\s*results`);
-  const itemIdRegex = /<a href="\/mercari\/item\/(\w+)"/g;
-  const url = `https://buyee.jp/mercari/search?keyword=${encodeURIComponent(query)}`;
+const run = async query => {
+  try {
+    const url = `https://buyee.jp/mercari/search?keyword=${encodeURIComponent(query)}`;
+    const res = await axios.get(url);
 
-  return axios.get(url).then(res => {
-    const numResultsMatch = res.data.match(numResultsRegex);
-    const numResults = numResultsMatch[1];
-
-    const itemIdMatches = [...res.data.matchAll(itemIdRegex)];
-    const itemIds = itemIdMatches.map(itemIdMatch => itemIdMatch[1]);
+    const numResults = extractOne(res.data, /&quot;\s*(\d+)\s*results/);
+    const itemIds = extractAll(res.data, /<a href="\/mercari\/item\/(\w+)(\?|")/g);
     const newItemIds = itemIds.filter(itemId => !itemCache[query]?.[itemId]);
 
     let messages = [];
@@ -31,9 +28,9 @@ const run = query => {
     itemCache[query] = itemIds.reduce((acc, cur) => ({...acc, [cur]: true}), {});
 
     return messages;
-  }).catch(err => {
+  } catch (err) {
     return [`Buyee Mercari (${query}) failed: ${err.response?.status}`];
-  });
+  }
 };
 
 module.exports = run;

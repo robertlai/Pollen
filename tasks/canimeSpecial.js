@@ -1,21 +1,20 @@
 const https = require('https');
 const axios = require('axios');
+const { extractAll } = require('../utils');
 
 let initializedCache = {};
 let numResultsCache = {};
 let itemCache = {};
 
-const run = query => {
-  const itemIdRegex = /<a href="\/cart\/add\?n=([A-Za-z0-9-]+)"/g;
-  const url = `http://special.canime.jp/${encodeURIComponent(query)}/`;
+const run = async query => {
+  try {
+    const url = `http://special.canime.jp/${encodeURIComponent(query)}/`;
+    const agent = new https.Agent({
+      rejectUnauthorized: false
+    });
+    const res = await axios.get(url, { httpsAgent: agent });
 
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
-
-  return axios.get(url, { httpsAgent: agent }).then(res => {
-    const itemIdMatches = [...res.data.matchAll(itemIdRegex)];
-    const itemIds = itemIdMatches.map(itemIdMatch => itemIdMatch[1]);
+    const itemIds = extractAll(res.data, /<a href="\/cart\/add\?n=([A-Za-z0-9-]+)"/g);
     const numResults = itemIds.length;
     const newItemIds = itemIds.filter(itemId => !itemCache[query]?.[itemId]);
 
@@ -33,9 +32,9 @@ const run = query => {
     itemCache[query] = itemIds.reduce((acc, cur) => ({...acc, [cur]: true}), {});
 
     return messages;
-  }).catch(err => {
+  } catch (err) {
     return [`Canime Special (${query}) failed: ${err.response?.status}`];
-  });
+  }
 };
 
 module.exports = run;

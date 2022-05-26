@@ -1,12 +1,12 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
+const { extractAll } = require('../utils');
 
 let initializedCache = {};
 let itemCache = {};
 
 const run = async query => {
   try {
-    const itemIdRegex = /href="\/item\/(\w+)">/g;
     const url = `https://jp.mercari.com/search?keyword=${encodeURIComponent(query)}&status=on_sale&sort=created_time&order=desc`;
 
     const browser = await puppeteer.launch();
@@ -14,8 +14,7 @@ const run = async query => {
     await page.goto(url, { waitUntil: 'networkidle2' });
     const pageHtml = await page.evaluate('new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML');
 
-    const itemIdMatches = [...pageHtml.matchAll(itemIdRegex)];
-    const itemIds = itemIdMatches.map(itemIdMatch => itemIdMatch[1]);
+    const itemIds =  extractAll(pageHtml, /href="\/item\/(\w+)">/g);
     const newItemIds = itemIds.filter(itemId => !itemCache[query]?.[itemId]);
 
     let messages = [];
