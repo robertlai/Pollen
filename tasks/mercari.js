@@ -1,11 +1,11 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
+const { filterNew, getCachedNum, isCacheInitialized, updateCache } = require('../cache');
 const { extractAll } = require('../utils');
 
-let initializedCache = {};
-let itemCache = {};
-
 const run = async query => {
+  const cacheKey = `mercari${query}`;
+
   try {
     const url = `https://jp.mercari.com/search?keyword=${encodeURIComponent(query)}&status=on_sale&sort=created_time&order=desc`;
 
@@ -15,16 +15,15 @@ const run = async query => {
     const pageHtml = await page.evaluate('new XMLSerializer().serializeToString(document.doctype) + document.documentElement.outerHTML');
 
     const itemIds =  extractAll(pageHtml, /href="\/item\/(\w+)">/g);
-    const newItemIds = itemIds.filter(itemId => !itemCache[query]?.[itemId]);
+    const newItemIds = filterNew(cacheKey, itemIds);
 
     let messages = [];
-    if (initializedCache[query] && newItemIds.length) {
-      messages.push(`${query} on Mercari new items:\n${newItemIds.map(itemId => `https://jp.mercari.com/item/${itemId}`).join('\n')}`);
+    if (isCacheInitialized(cacheKey) && newItemIds.length) {
+      messages.push(`${query} on Mercari new items:\n${newItemIds.slice(0, 3).map(itemId => `https://jp.mercari.com/item/${itemId}`).join('\n')}`);
       newItemIds.slice(0, 3).forEach(itemId => messages.push(`https://static.mercdn.net/c!/w=240/thumb/photos/${itemId}_1.jpg`));
     }
 
-    initializedCache[query] = true;
-    itemCache[query] = itemIds.reduce((acc, cur) => ({...acc, [cur]: true}), {});
+    updateCache(cacheKey, itemIds);
 
     return messages;
   } catch (err) {
