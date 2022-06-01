@@ -27,7 +27,7 @@ const run = async query => {
 
     return messages;
   } catch (err) {
-    return [`Mercari (${query}) failed: ${err}`];
+    return [`Mercari (${query}) failed: ${err}`.slice(0, 500)];
   }
 };
 
